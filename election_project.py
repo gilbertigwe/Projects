@@ -74,7 +74,7 @@ from bokeh.models.widgets.tables import TableColumn, DataTable
 
 
 
-
+# I used a custom stoplist because most Nigerians informally interact in pidgin on twitter.
 def stoplist():
     my_stoplist = [
 
@@ -571,7 +571,7 @@ def stoplist():
 "till", "until","votekingsleymoghalugetso", "voteypp", "itstime", "'s", '‘',"year",'’','•', "presidency", "retweet","aa" ]
     return my_stoplist
 
-
+#Created a list of continents and countries
 africa = "|".join(["Angola", 
                    "Africa",
 "Burkina Faso",
@@ -853,7 +853,7 @@ oceania = "|".join([
 
 
 
-
+#A list of the key cities in political regions in Nigeria
 NC = '|'.join(["Makurdi","Benue", "Abaji","Gwagwalada","Kuje","Bwari","Kwali","abuja","Ilorin", "Kogi","Ajaokuta", "Idah","Igalamela-Odolu","Ijumu","Kabba","Lokoja","Okene", "Asa, Ilorin", "Kwara","jos", "pankshin", "Plateau", "Lafia", "Nasarawa", "Bida", "Minna", "Suleja", "Federal Capital Territory"])
 
 
@@ -880,9 +880,9 @@ SW = '|'.join(["Ado-Ekiti", "Ekiti","Lagos", "Ikeja", "Lekki", "Victoria Island"
 
 my_stoplist = stoplist()
 
+#Function to clean tweets
+
 def clean_df(df):
-    import warnings
-    warnings.filterwarnings("ignore", 'This pattern has match groups') # uncomment to suppress the UserWarning
     df['clean'] =  df['text'].apply(lambda x: unescape(x))
     df.clean = df.clean.apply(lambda x: x.lower())
     punct = str.maketrans(dict.fromkeys(string.punctuation))
@@ -914,7 +914,7 @@ def clean_df(df):
 
 
 
-  
+ #Function to process tweets
 def process_texts(docs):
     #import spacy
     #from spacy.lang.en.stop_words import STOP_WORDS
@@ -959,7 +959,7 @@ def check_word_in_data(word, df):
 
 
 
-
+#Function to create a data subset for a given region
 def region_text(region,df):
     newdf = df[(df.region == region)]
     return newdf[['clean','label']]
@@ -967,14 +967,22 @@ def region_text(region,df):
 
 
 
-
+#Function to create a subset of all negative tweets
 def label_neg(word, df):
     new =  df[check_word_in_data(word, df)]
     neg = [text for text in new[new['label'] == 'Negative']['clean']]
     return neg
     
-    
-    
+
+#Function to create a subset of all positive tweets
+
+def label_pos(word, df):
+    new =  df[check_word_in_data(word, df)]
+    pos = [text for text in new[new['label'] == 'Positive']['clean']]
+    return pos
+	
+	
+ #Function to create a subset of negative tweets for a given candidate
 def neg_clean_candidate(word, df):
     docs = label_neg(word, df)
     words = process_texts(docs)
@@ -985,6 +993,7 @@ def neg_clean_candidate(word, df):
     return filtered_text_neg, neg_counts
 
 
+#Function to create a subset of positive tweets for a given candidate
 
 def pos_clean_candidate(word, df):
 
@@ -999,14 +1008,11 @@ def pos_clean_candidate(word, df):
 
 
 
-def label_pos(word, df):
-    new =  df[check_word_in_data(word, df)]
-    pos = [text for text in new[new['label'] == 'Positive']['clean']]
-    return pos
+
     
 
 
-
+#Function to return a count of tweets for a given name
 def count_label(name, label):
     new =  df[check_word_in_data(name, df)]
     chec = Counter([text for text in new[new['label'] == label]['label']]).most_common()
@@ -1020,13 +1026,14 @@ def label_list(list_name, label):
           return labl.append(count_label(name, label))
         
         
-        
+#Function to return daily sentiment for a given name (candidate or party)        
 def check_sent_daily(name):
     name = name
     sent = sentiment[check_word_in_data(name, df)].resample('D').mean()
     return sent
 
 
+#Function to return weekly sentiment for a given name (candidate or party)        
 
 def check_sent_week(name):
     name = name
@@ -1088,7 +1095,7 @@ def plot_mention(df):
 # In[6]:
 
 
-
+#Function to plot proportion of tweets
 def visual_prop(df,name):
     from bokeh.plotting import figure
     from bokeh.models import NumeralTickFormatter
@@ -1116,7 +1123,7 @@ def visual_prop(df,name):
 
 
 
-
+#Function to plot sum of tweets
 def visual_sum(df,name):
     from bokeh.plotting import figure
     length = len(df.columns)
@@ -1141,7 +1148,7 @@ def visual_sum(df,name):
 
 
 
-
+#Function to create the grid of trend (proportion, sum, cumsum, daily sum, daily cumsum)  of mentions
 def draw_line_mentions(df):
     candi_daily_prop = pd.DataFrame({
 	"Buhari" : check_word_in_data('buhari', df).resample('D').mean(),
@@ -1229,7 +1236,7 @@ def draw_line_mentions(df):
 
 
 
-
+#Function to return a count of mentions per region
 def count_region(df,name, label, region):
     new =  df[check_word_in_data(name, df)]
     label_df = new[new['label'] == label]
@@ -1250,7 +1257,7 @@ def clean_region(lst):
 
 
 
-
+#Function to create the visualization object for sentiment distribution per region per candidate or party
 def visual_region_group(source, regions, factors, word):
     p = figure(x_range=FactorRange(*factors), plot_height=400, plot_width = 950, title = 'Distribution of Sentiments by Region - ' + word )
     p.vbar_stack(regions, x='x', width=0.9, alpha=0.5, color=Category20[13], source=source,
@@ -1269,8 +1276,7 @@ def visual_region_group(source, regions, factors, word):
 
 
 
-
-#list of candidate or party name as input
+#Takes list of candidates or region and creates a plot object of the sentiment distribution
 def create_plot_region(df,cand_or_party, word):
 	regions= ["NC","NE","NW","SE","SS","SW","Africa","Americas","Europe","Asia","Oceania", "Unclassified", "Other_Nigeria"]
 	label = ['Positive', 'Neutral', 'Negative']
@@ -1297,7 +1303,7 @@ def create_plot_region(df,cand_or_party, word):
 
 
 	source = ColumnDataSource(data=dict(x = factors, 
-									NC = NC,
+				    NC = NC,
                                     NE = NE, 
                                     NW = NW,
                                     SE = SE,
@@ -1321,7 +1327,7 @@ def create_plot_region(df,cand_or_party, word):
 
 
 
-
+#Returns the tabs for regional sentiment distribution per candidates and parties
 def return_plot_region(df):
 	#plot candidates 
     candidates =  ['Buhari', 'Atiku', 'Sowore', 'Moghalu']
@@ -1339,7 +1345,7 @@ def return_plot_region(df):
 
 
 
-
+#Function to return plot of trend of average sentiment per candidate or party
 def visual_sentiment(df, name):
     from bokeh.plotting import figure
 
@@ -1361,7 +1367,7 @@ def visual_sentiment(df, name):
 
 
 
-
+#Function to return count of sentiments
 def label_plot(cand_or_party, label_data, name):
     from bokeh.models import ColumnDataSource, FactorRange
     from bokeh.transform import factor_cmap
@@ -1380,23 +1386,24 @@ def label_plot(cand_or_party, label_data, name):
 
 
 
-
+#Function to return count of sentiment per given candidate or party
 def count_label(name, label, df):
     new =  df[check_word_in_data(name, df)]
-    chec = Counter([text for text in new[new['label'] == label]['label']]).most_common(1)
+    chec = Counter([text for text in new[new[label] == label][label]]).most_common(1)
     check = [word[1] for word in chec]
     return int(pd.Series(check))
 
 
         
         
-        
+ #Function to return daily sentiment for a given candisate or party       
 def check_sent_daily(name,sentiment,df):
     name = name
     sent = sentiment[check_word_in_data(name, df)].resample('D').mean()
     return sent
 
 
+ #Function to return weekly sentiment for a given candisate or party       
 
 def check_sent_week(name,sentiment,df ):
     name = name
@@ -1408,7 +1415,7 @@ def check_sent_week(name,sentiment,df ):
 
 
 
-
+#Function to return grid object of sentiment count plot
 def plot_label_count(df):
     candidates =  ['Buhari', 'Atiku', 'Sowore', 'Moghalu']
     parties = ['APC', 'PDP', 'AAC', 'YPP']
@@ -1443,7 +1450,7 @@ def plot_label_count(df):
 
 
 
-
+#Function to return grid object of weekly avg sentiment plot
 def plot_sentiment_avg_daily_weekly(df):
     sid = SentimentIntensityAnalyzer()
     sentiment_scores = df.clean.apply(sid.polarity_scores)
@@ -1511,8 +1518,6 @@ def plot_sentiment_avg_daily_weekly(df):
 
 # In[9]:
 
-
-
 def process_texts(docs):
     #import spacy
     #from spacy.lang.en.stop_words import STOP_WORDS
@@ -1526,16 +1531,14 @@ def process_texts(docs):
         counter += 1
         doc = nlp(doc, disable=['parser', 'ner'])
         tokens = [tok.lemma_.lower().strip() for tok in doc if tok.lemma_ != '-PRON-']
-        #tokens = [tok for tok in tokens if tok not in my_stoplist and tok not in punct ]
+        tokens = [tok for tok in tokens if tok not in my_stoplist and tok not in punct ]
         tokens ='  '.join(tokens)
         texts.append(tokens)
     return pd.Series(texts)
 
 
-def label_neg(word, df):
-    new =  df[check_word_in_data(word, df)]
-    neg = [text for text in new[new['label'] == 'Negative']['clean']]
-    return neg
+
+#Function to return word count for negative terms of interest
 
 def neg_terms_of_interest(word, df):
     stop = stopwords.words('english')
@@ -1548,6 +1551,7 @@ def neg_terms_of_interest(word, df):
     return filtered_text_neg, neg_counts
 
 
+#Function to return plot objects of negative terms of interest.
 
 def visualize_interest(neg_word, neg_count,name):
     type_neg = 'Negative'
@@ -1564,7 +1568,7 @@ def visualize_interest(neg_word, neg_count,name):
 
 
 
-
+#Instantiation of negative terms of interest
 def plot_special_interest(df):
     corruption_neg_words,corruption_neg_count = neg_terms_of_interest('corruption|corrupt|embezzle|Steal|loot|looters|fraud|siphon', df)
     plot1 = visualize_interest(corruption_neg_words, corruption_neg_count, 'Corruption')
@@ -1599,9 +1603,10 @@ def plot_special_interest(df):
 
 
 
-
+#Instantiation of stopwords
 my_stoplist = stoplist()
 
+#Remove non-ascii words.  
 def remove_non_ascii(words):
     """Remove non-ASCII characters from list of tokenized words"""
     new_words = []
@@ -1611,21 +1616,6 @@ def remove_non_ascii(words):
     return new_words
 
 
-
-def label_neg(word, df):
-    new =  df[check_word_in_data(word, df)]
-    neg = [text for text in new[new['label'] == 'Negative']['clean']]
-    return neg
-    
-    
-    
-    
-    
-def label_pos(word, df):
-    new =  df[check_word_in_data(word, df)]
-    pos = [text for text in new[new['label'] == 'Positive']['clean']]
-    return pos
-    
     
     
     
@@ -1659,7 +1649,7 @@ def process_texts(docs):
     
     
     
-    
+#FUnction to return count and words in negative tweets    
 def neg_clean_candidate(word, df):
     docs = label_neg(word, df)
     words = process_texts(docs)
@@ -1671,6 +1661,7 @@ def neg_clean_candidate(word, df):
 
 
 
+#FUnction to return count and words in positive tweets
 def pos_clean_candidate(word, df):
 
     docs = label_pos(word, df)
@@ -1708,7 +1699,7 @@ def pos_clean_candidate(word, df):
 
 
 
-
+#Function to plot top 30 words
 def plot_top_common_words(word_counts, name, typeof):
     common_words = [word[0] for word in word_counts.most_common(30)]
     common_counts = [word[1] for word in word_counts.most_common(30)]
@@ -1724,7 +1715,7 @@ def plot_top_common_words(word_counts, name, typeof):
 
 
 
-
+#Function to plot top 30 bigrams
 def plot_30_common_bigrams(word, name, typeof):
     words_2g = ngrams((word), 2)
     words2g_list = [' '.join(grams) for grams in words_2g]
@@ -1741,7 +1732,7 @@ def plot_30_common_bigrams(word, name, typeof):
     return bar
 
 
-
+#Function to plot top 30 trigrams
 def plot_30_common_trigrams(word, name, typeof):
     words_3g = ngrams((word), 3)
     words3g_list = [' '.join(grams) for grams in words_3g]
@@ -1761,30 +1752,13 @@ def plot_30_common_trigrams(word, name, typeof):
 
 
 
-
+#Returns tweets and sentiment label for a given region
 def region_text(region,df):
     newdf = df[(df.region == region)]
     return newdf[['clean','label']]
 
 
-def visualize_region(word, df, type_pos, type_neg, region):
-    neg_word, neg_count = neg_clean_candidate(word, df)
-    pos_words, pos_count = pos_clean_candidate(word, df)
-    name = word.capitalize() + "" + region
-    return visualize(neg_word, neg_count, pos_words, pos_count, name, type_pos, type_neg)
-
-
-
-
-
-
-
-
-
-# In[11]:
-
-
-
+#Visualize common words and bigrams
 def visualize(neg_word, neg_count, pos_word, pos_count, name, type_pos, type_neg):
     #from bokeh.layouts import  gridplot
     plot_1=plot_top_common_words(word_counts =neg_count , name =name, typeof = type_neg )
@@ -1801,6 +1775,25 @@ def visualize(neg_word, neg_count, pos_word, pos_count, name, type_pos, type_neg
     #pan = Panel(child = col, title = "Word Distribution  - " + name)
     #tab = Tabs(tabs = [pan])
     return plot_1,plot_3,plot_5, plot_7
+
+
+
+#Visualize negative and positive sentiments for a given candidate/party for a given region
+def visualize_region(word, df, type_pos, type_neg, region):
+    neg_word, neg_count = neg_clean_candidate(word, df)
+    pos_words, pos_count = pos_clean_candidate(word, df)
+    name = word.capitalize() + "" + region
+    return visualize(neg_word, neg_count, pos_words, pos_count, name, type_pos, type_neg)
+
+
+
+
+
+
+
+
+
+# In[11]:
 
 
 
@@ -1878,13 +1871,6 @@ def draw_word_distribution(df):
 
 
 
-# # FIXING VISUALIZE FUNCTION
-
-# In[ ]:
-
-#Analyze visualize. It has a problem
-
-
 # In[ ]:
 
 
@@ -1892,21 +1878,11 @@ def draw_word_distribution(df):
 
 # In[ ]:
 
-def check_name(df):
-    neg_word_buhari, neg_buhari_count = neg_clean_candidate('buhari', df)
-    pos_word_buhari, pos_buhari_count = pos_clean_candidate('buhari', df)
-    visualize(neg_word_buhari, neg_buhari_count, pos_word_buhari, pos_buhari_count, 'Buhari', 'Positive', 'Negative')
-    return visualize
 
 
 # In[ ]:
 
-#tt = check_name(df)
 
-
-# In[ ]:
-
-#save(tt, filename = 'tab1.html')
 
 
 # In[ ]:
@@ -1922,11 +1898,10 @@ def check_name(df):
 # In[12]:
 
 
- 
-my_stoplist = stoplist()
 
 
 
+#return visualization grids for regions
 def visualize_region(word, df, type_pos, type_neg, region):
     neg_word, neg_count = neg_clean_candidate(word, df)
     pos_words, pos_count = pos_clean_candidate(word, df)
@@ -1945,7 +1920,7 @@ def visualize_region(word, df, type_pos, type_neg, region):
 
 
 
-
+#Return panel of regions
 def draw_word_distribution_regions(df, name):
 	 
 
@@ -2021,7 +1996,7 @@ def draw_word_distribution_regions(df, name):
 
 
 # In[13]:
-
+#Connect to MongoDB
 client = MongoClient('mongodb://gilbert:Akanchawa123$@cluster0-shard-00-00-xkbsr.gcp.mongodb.net:27017,cluster0-shard-00-01-xkbsr.gcp.mongodb.net:27017,cluster0-shard-00-02-xkbsr.gcp.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true')
 
 #COnnect to DB
@@ -2029,53 +2004,26 @@ db = client['politics']
 
 #Connect to Collection
 collection = db['fordb']
-#collection = db.get_collection('electdata',codec_options=codec_options)
 
 
 
 #Extract Collection into Dataframe
 data_list = list(collection.find())
-#data = pd.DataFrame(list(collection.find()))
-
-
-# In[14]:
-
 data = pd.DataFrame(data_list)
 
 
 
-# In[ ]:
-
-#test_data.pop('polarity')
-
-
-# In[ ]:
-
-#test_data
-
-
 # In[15]:
-
+#Instatiate data cleaning function
 df = clean_df(data)
 
 
 # In[16]:
-
+#Instantiate mention plots
 tab1 = plot_mention(df)
 p1 = Panel(child = tab1, title = 'Mentions Parties')
 
-#tab15 = draw_word_distribution_regions(df, 'Buhari')
-#tab16 = draw_word_distribution_regions(df, 'APC')
-#tab17 = draw_word_distribution_regions(df, 'Atiku')
-#tab18 = draw_word_distribution_regions(df, 'PDP')
-#tab19 = draw_word_distribution_regions(df, 'Sowore')
-#tab20 = draw_word_distribution_regions(df, 'AAC')
-#tab21 = draw_word_distribution_regions(df, 'kingsley|moghalu')
-#tab22 = draw_word_distribution_regions(df, 'YPP')
-
-
-# In[17]:
-
+#Instantiate mention trend plot
 tab2 = draw_line_mentions(df)
 p2 = Panel(child = tab2, title = 'Avg Daily Mentions')
 
@@ -2083,18 +2031,18 @@ p2 = Panel(child = tab2, title = 'Avg Daily Mentions')
 # In[ ]:
 
 
-
+#Istantiate region plots
 tab3 = return_plot_region(df)
 p3 = Panel(child = tab3, title= 'Sentiment by Region')
 
 
 # In[ ]:
 
-df.head()
+
 
 
 # In[ ]:
-
+#Instantiate sentiment count
 tab4 = plot_label_count(df)
 p4 = Panel(child =tab4, title ='Sentiment Count')
 
@@ -2103,7 +2051,7 @@ p4 = Panel(child =tab4, title ='Sentiment Count')
 
 # In[ ]:
 
-
+#Istantiate sentiment trend plot
 tab5 = plot_sentiment_avg_daily_weekly(df)
 p5 = Panel(child =tab5, title ='Average Sentiments (Daily & Weekly)')
 
@@ -2111,26 +2059,22 @@ p5 = Panel(child =tab5, title ='Average Sentiments (Daily & Weekly)')
 # In[ ]:
 
 
-
+#Instantiate plot of special issues of interest
 tab6 = plot_special_interest(df)
 p6 = Panel(child = tab6, title = "Negative Tweets - Special Issues")
 
 
 # In[ ]:
 
-
+#Instantiate word distributions
 tab7 = draw_word_distribution(df)
 p7 = Panel(child = tab7, title = "Unique Word Distribution")
 
 
 # In[ ]:
-
+#Create a sample of data
 data = df.sample(1000)
 bokeh_table = data[['user_name','clean', 'label','user_location', 'region', ]]
-
-
-
-# In[ ]:
 
 
 Columns = [TableColumn(field=Ci, title=Ci) for Ci in bokeh_table.columns] # bokeh columns
@@ -2145,17 +2089,17 @@ p8 = Panel(child =data_table, title = 'SampleTable' )
 
 
 # In[ ]:
-
+#Create tabs of all plots
 tab = Tabs(tabs =[p1, p2,p3,p4,p5,p6,p7,p8 ])
 
 
 # In[ ]:
-
+#Save as index
 save(tab, filename = 'index.html', title = 'Nigerian Elections 2019')
 
 
 # In[ ]:
-
+#Check count of unique usernames.
 print(len(df.user_name.unique()))
 
 
