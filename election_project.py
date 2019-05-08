@@ -2,71 +2,27 @@
 # coding: utf-8
 
 # In[3]:
-
 from bokeh.models import Panel
-from bokeh.layouts import layout, gridplot
-import pandas as pd
 from bokeh.models.widgets.panels import Tabs
 from collections import Counter
 import string, unicodedata
 import pandas as pd
-from collections import Counter
 from bokeh.plotting import figure
 from nltk.util import ngrams
 from bokeh.palettes import viridis
-from bokeh.layouts import layout, gridplot
-from bokeh.models.widgets import Panel, Tabs
-from collections import Counter
-from nltk.corpus import stopwords
-import pandas as pd
-from bokeh.layouts import  layout, gridplot
-from bokeh.plotting import figure
-from bokeh.palettes import viridis
-from bokeh.models import Panel
-import string
-#import spacy
-from bokeh.models.widgets import Tabs
-
-import pandas as pd
-from collections import Counter
 from bokeh.palettes import Spectral11
 from bokeh.palettes import Set1
-from bokeh.models import ColumnDataSource
-from bokeh.plotting import figure
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-from bokeh.layouts import layout, gridplot
-#from bokeh.models.widgets import Panel, Tabs
-from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, FactorRange
-from collections import Counter
 import numpy as np
 from bokeh.palettes import Category20
-#from bokeh.models.widgets import Panel
-#from scripts.clean import check_word_in_data
-import pandas as pd
-from bokeh.layouts import layout, gridplot
 from bokeh.core.properties import value
-
-
-
-from bokeh.models.widgets import Panel
-from bokeh.palettes import Spectral11
-import pandas as pd
-from bokeh.models import ColumnDataSource
 from bokeh.layouts import layout, row, column, gridplot
-
-
-from bokeh.models.widgets import Panel
-import numpy as np
 from bokeh.palettes import Spectral
-from bokeh.layouts import layout, row
-
 from pymongo import MongoClient
-
 from bokeh.io import curdoc, output_file
 from html import unescape
 from bokeh.io import show, save
-
 from bokeh.models.widgets.tables import TableColumn, DataTable
 
 
