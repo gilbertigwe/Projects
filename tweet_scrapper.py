@@ -1,7 +1,7 @@
 
 import tweepy
 #from textblob import TextBlob
-from sqlalchemy.exc import ProgrammingError
+#from sqlalchemy.exc import ProgrammingError
 from tweepy import OAuthHandler
 from pymongo import MongoClient
 import numpy as np
