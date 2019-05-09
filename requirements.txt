@@ -1,0 +1,7 @@
+tweepy
+vaderSentiment
+bokeh
+collections
+nltk
+pymongo
+html
