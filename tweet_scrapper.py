@@ -1,8 +1,6 @@
-#import settings
-#import pandas as pd
+
 import tweepy
-#import dataset
-from textblob import TextBlob
+#from textblob import TextBlob
 from sqlalchemy.exc import ProgrammingError
 from tweepy import OAuthHandler
 from pymongo import MongoClient
@@ -14,9 +12,7 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 import json
 
-#db = dataset.connect('mysql://root:Akanchawa123$@localhost/Election')
-#CSV_NAME = "tweets.csv"
-#TABLE_NAME = "election"
+
 
 analyzer = SentimentIntensityAnalyzer()
 def senti_analyzer_label(text):
