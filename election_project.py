@@ -1953,7 +1953,7 @@ def draw_word_distribution_regions(df, name):
 
 # In[13]:
 #Connect to MongoDB
-client = MongoClient('your mongodb dblink')
+client = MongoClient('your mongodb credentials')
 
 #COnnect to DB
 db = client['politics']
